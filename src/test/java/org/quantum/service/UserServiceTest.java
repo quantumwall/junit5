@@ -18,8 +18,11 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.quantum.dto.User;
+import org.quantum.paramresolver.UserServiceParamResolver;
 
+@ExtendWith({ UserServiceParamResolver.class })
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserServiceTest {
@@ -28,8 +31,8 @@ public class UserServiceTest {
 	private static final User IVAN = User.of(1, "Ivan", "123");
 	private static final User PETR = User.of(2, "Petr", "111");
 
-	public UserServiceTest() {
-		this.userService = new UserService();
+	public UserServiceTest(UserService userService) {
+		this.userService = userService;
 	}
 
 	@BeforeAll
