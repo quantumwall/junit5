@@ -11,11 +11,17 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.quantum.dto.User;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserServiceTest {
 
 	private final UserService userService;
@@ -36,26 +42,13 @@ public class UserServiceTest {
 	}
 
 	@Test
-	void loginSuccessIfUserExists() {
-		userService.add(IVAN);
-		var optUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
-		assertTrue(optUser.isPresent());
-	}
-
-	@Test
-	void loginFailIfUserIsNotExists() {
-		userService.add(IVAN);
-		var optUser = userService.login("dummy", IVAN.getPassword());
-		assertThat(optUser).isEmpty();
-	}
-
-	@Test
 	void emptyIfNoUsersAdded() {
 		List<User> users = userService.findAll();
 		assertTrue(users.isEmpty());
 	}
 
 	@Test
+	@Order(1)
 	void notEmptyIfUsersAdded() {
 		userService.add(IVAN);
 		userService.add(PETR);
@@ -63,16 +56,11 @@ public class UserServiceTest {
 	}
 
 	@Test
+	@Order(2)
 	void testConvertedById() {
 		userService.add(IVAN, PETR);
 		var users = userService.getUsersConvertedById();
 		assertAll(() -> assertThat(users).containsKeys(1, 2), () -> assertThat(users).containsValues(IVAN, PETR));
-	}
-
-	@Test
-	void shoulThrowExceptionIfUsernameOrPasswordIsNull() {
-		assertAll(() -> assertThrows(NullPointerException.class, () -> userService.login(null, "dummy")),
-				() -> assertThrows(NullPointerException.class, () -> userService.login("dummy", null)));
 	}
 
 	@AfterEach
@@ -83,5 +71,30 @@ public class UserServiceTest {
 	@AfterAll
 	void afterAll() {
 		System.out.println("After all " + this);
+	}
+
+	@Nested
+	@DisplayName("test login functionality")
+	class LoginTest {
+
+		@Test
+		void shoulThrowExceptionIfUsernameOrPasswordIsNull() {
+			assertAll(() -> assertThrows(NullPointerException.class, () -> userService.login(null, "dummy")),
+					() -> assertThrows(NullPointerException.class, () -> userService.login("dummy", null)));
+		}
+
+		@Test
+		void loginSuccessIfUserExists() {
+			userService.add(IVAN);
+			var optUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
+			assertTrue(optUser.isPresent());
+		}
+
+		@Test
+		void loginFailIfUserIsNotExists() {
+			userService.add(IVAN);
+			var optUser = userService.login("dummy", IVAN.getPassword());
+			assertThat(optUser).isEmpty();
+		}
 	}
 }
