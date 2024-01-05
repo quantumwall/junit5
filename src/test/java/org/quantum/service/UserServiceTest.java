@@ -4,9 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
-
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,6 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.quantum.dto.User;
 import org.quantum.paramresolver.UserServiceParamResolver;
 
@@ -76,14 +78,21 @@ public class UserServiceTest {
 		System.out.println("After all " + this);
 	}
 
+	/*
+	 * static method used in parameterized tests, provide 2 group of 2 arguments
+	 */
+	static Stream<Arguments> incorrectUsernamePasswordProvider() {
+		return Stream.of(Arguments.of(null, "dummy"), Arguments.of("dummy", null));
+	}
+
 	@Nested
 	@DisplayName("test login functionality")
 	class LoginTest {
 
-		@Test
-		void shoulThrowExceptionIfUsernameOrPasswordIsNull() {
-			assertAll(() -> assertThrows(NullPointerException.class, () -> userService.login(null, "dummy")),
-					() -> assertThrows(NullPointerException.class, () -> userService.login("dummy", null)));
+		@MethodSource("org.quantum.service.UserServiceTest#incorrectUsernamePasswordProvider")
+		@ParameterizedTest
+		void shoulThrowExceptionIfUsernameOrPasswordIsNull(String username, String password) {
+			assertThrows(NullPointerException.class, () -> userService.login(username, password));
 		}
 
 		@Test
