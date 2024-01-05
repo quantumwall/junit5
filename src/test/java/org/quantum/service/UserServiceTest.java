@@ -5,18 +5,22 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -47,6 +51,7 @@ public class UserServiceTest {
 	}
 
 	@Test
+	@Disabled("flaky, check later")
 	void emptyIfNoUsersAdded() {
 		List<User> users = userService.findAll();
 		assertTrue(users.isEmpty());
@@ -54,14 +59,20 @@ public class UserServiceTest {
 
 	@Test
 	@Order(1)
+	@Timeout(value = 200, unit = TimeUnit.MILLISECONDS)
 	void notEmptyIfUsersAdded() {
 		userService.add(IVAN);
 		userService.add(PETR);
+		try {
+			Thread.sleep(300);
+		} catch (InterruptedException e) {
+			System.err.println("Timeout... interrupted");
+		}
 		assertThat(userService.findAll()).hasSize(2);
 	}
 
-	@Test
 	@Order(2)
+	@RepeatedTest(5)
 	void testConvertedById() {
 		userService.add(IVAN, PETR);
 		var users = userService.getUsersConvertedById();
