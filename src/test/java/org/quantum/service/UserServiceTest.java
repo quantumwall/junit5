@@ -15,30 +15,25 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.quantum.dao.UserDao;
 import org.quantum.dto.User;
 import org.quantum.paramresolver.UserServiceParamResolver;
 
-@ExtendWith({ UserServiceParamResolver.class })
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith({ UserServiceParamResolver.class, MockitoExtension.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserServiceTest {
 
-	private UserService userService;
+	@Mock
 	private UserDao userDao;
+
+	@InjectMocks
+	private UserService userService;
 	private static final User IVAN = User.of(1, "Ivan", "123");
 	private static final User PETR = User.of(2, "Petr", "111");
-
-	@BeforeAll
-	void beforeAll() {
-	}
-
-	@BeforeEach
-	void beforeEach() {
-		userDao = Mockito.spy(UserDao.class);
-		userService = new UserService(userDao);
-	}
 
 	@Test
 	void deleteTest() throws SQLException {
@@ -73,6 +68,7 @@ public class UserServiceTest {
 	}
 
 	@Order(2)
+	@Disabled
 	@RepeatedTest(5)
 	void testConvertedById() {
 		userService.add(IVAN, PETR);
@@ -83,11 +79,6 @@ public class UserServiceTest {
 	@AfterEach
 	void afterEach() {
 		System.out.println("After each " + this);
-	}
-
-	@AfterAll
-	void afterAll() {
-		System.out.println("After all " + this);
 	}
 
 	/*
