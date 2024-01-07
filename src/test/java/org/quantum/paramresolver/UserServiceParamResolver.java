@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.quantum.dao.UserDao;
 import org.quantum.service.UserService;
 
 public class UserServiceParamResolver implements ParameterResolver {
@@ -19,7 +20,7 @@ public class UserServiceParamResolver implements ParameterResolver {
 	public Object resolveParameter(ParameterContext parameterContext,
 								   ExtensionContext extensionContext) throws ParameterResolutionException {
 		var store = extensionContext.getStore(Namespace.GLOBAL);
-		return store.getOrComputeIfAbsent(UserService.class, k -> new UserService());
+		return store.getOrComputeIfAbsent(UserService.class, k -> new UserService(new UserDao()));
 	}
 
 }

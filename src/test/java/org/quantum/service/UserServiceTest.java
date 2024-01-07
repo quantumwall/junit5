@@ -25,6 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
+import org.quantum.dao.UserDao;
 import org.quantum.dto.User;
 import org.quantum.paramresolver.UserServiceParamResolver;
 
@@ -34,6 +36,7 @@ import org.quantum.paramresolver.UserServiceParamResolver;
 public class UserServiceTest {
 
 	private final UserService userService;
+	private UserDao userDao;
 	private static final User IVAN = User.of(1, "Ivan", "123");
 	private static final User PETR = User.of(2, "Petr", "111");
 
@@ -48,6 +51,15 @@ public class UserServiceTest {
 	@BeforeEach
 	void beforeEach() {
 		userService.deleteAll();
+		userDao = Mockito.mock(UserDao.class);
+	}
+
+	@Test
+	void deleteTest() {
+		userService.add(IVAN);
+//		Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
+		Mockito.when(userDao.delete(IVAN.getId())).thenReturn(true);
+		assertThat(userService.delete(IVAN.getId())).isTrue();
 	}
 
 	@Test
@@ -63,11 +75,11 @@ public class UserServiceTest {
 	void notEmptyIfUsersAdded() {
 		userService.add(IVAN);
 		userService.add(PETR);
-		try {
-			Thread.sleep(300);
-		} catch (InterruptedException e) {
-			System.err.println("Timeout... interrupted");
-		}
+//		try {
+//			Thread.sleep(300);
+//		} catch (InterruptedException e) {
+//			System.err.println("Timeout... interrupted");
+//		}
 		assertThat(userService.findAll()).hasSize(2);
 	}
 
