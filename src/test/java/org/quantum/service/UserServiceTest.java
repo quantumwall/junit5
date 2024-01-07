@@ -4,28 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.only;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.quantum.dao.UserDao;
 import org.quantum.dto.User;
@@ -43,13 +32,12 @@ public class UserServiceTest {
 
 	@BeforeAll
 	void beforeAll() {
-		userDao = Mockito.mock(UserDao.class);
-		userService = new UserService(userDao);
 	}
 
 	@BeforeEach
 	void beforeEach() {
-		userService.deleteAll();
+		userDao = Mockito.spy(UserDao.class);
+		userService = new UserService(userDao);
 	}
 
 	@Test
@@ -58,6 +46,9 @@ public class UserServiceTest {
 		Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
 //		Mockito.when(userDao.delete(IVAN.getId())).thenReturn(true);
 		assertThat(userService.delete(IVAN.getId())).isTrue();
+		var argumentCaptor = ArgumentCaptor.forClass(Integer.class);
+		Mockito.verify(userDao, only()).delete(argumentCaptor.capture());
+		assertThat(argumentCaptor.getValue()).isEqualTo(IVAN.getId());
 	}
 
 	@Test
