@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -35,30 +36,27 @@ import org.quantum.paramresolver.UserServiceParamResolver;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserServiceTest {
 
-	private final UserService userService;
+	private UserService userService;
 	private UserDao userDao;
 	private static final User IVAN = User.of(1, "Ivan", "123");
 	private static final User PETR = User.of(2, "Petr", "111");
 
-	public UserServiceTest(UserService userService) {
-		this.userService = userService;
-	}
-
 	@BeforeAll
 	void beforeAll() {
+		userDao = Mockito.mock(UserDao.class);
+		userService = new UserService(userDao);
 	}
 
 	@BeforeEach
 	void beforeEach() {
 		userService.deleteAll();
-		userDao = Mockito.mock(UserDao.class);
 	}
 
 	@Test
-	void deleteTest() {
+	void deleteTest() throws SQLException {
 		userService.add(IVAN);
-//		Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
-		Mockito.when(userDao.delete(IVAN.getId())).thenReturn(true);
+		Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
+//		Mockito.when(userDao.delete(IVAN.getId())).thenReturn(true);
 		assertThat(userService.delete(IVAN.getId())).isTrue();
 	}
 

@@ -1,5 +1,6 @@
 package org.quantum.service;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +21,7 @@ public class UserService {
 		this.userDao = userDao;
 	}
 
-	public boolean delete(Integer userId) {
+	public boolean delete(Integer userId) throws SQLException {
 		return userDao.delete(userId);
 	}
 
